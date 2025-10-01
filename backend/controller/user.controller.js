@@ -3,6 +3,7 @@ import Notification from "../models/notification.model.js"
 import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import { v2 as cloudinary } from 'cloudinary';
+import { getPublicIdFromUrl } from "../lib/utils/getPublicIdfromUrl.js";
 export const getUserProfile = async (req, res) => {
     const { username } = req.params
     try {
@@ -86,21 +87,11 @@ export const getSuggestedUser = async (req, res) => {
 }
 
 
-const getPublicIdFromUrl = (url, folderName) => {
-    if (!url) return null;
-    const parts = url.split('/');
-    const fileWithExtension = parts.pop();
-    if (!fileWithExtension) return null;
 
-
-    const publicIdWithoutFolder = fileWithExtension.split('.')[0];
-
-
-    return `${folderName}/${publicIdWithoutFolder}`;
-};
 
 export const updateUserProfile = async (req, res) => {
-    const { username, fullname, email, currentPassword, newPassword, bio, link, profileImg, coverImg } = req.body;
+    const { username, fullname, email, currentPassword, newPassword, bio, link,  } = req.body;
+    let {profileImg,coverImg}=req.body
     const userId = req.user._id;
 
     try {

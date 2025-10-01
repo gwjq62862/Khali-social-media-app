@@ -1,6 +1,8 @@
 import express from 'express'
 import authRoutes from './routes/auth.route.js'
 import userRouter from './routes/user.route.js'
+import postRouter from './routes/post.route.js'
+import commentRouter from './routes/comment.route.js'
 import { ConnectDB } from './db/connectDb.js'
 import dotenv from 'dotenv'
 import { v2 as cloudinary } from 'cloudinary';
@@ -21,7 +23,8 @@ app.use(cookieParser())
 app.use('/api/auth', authRoutes)
 
 app.use('/api/users', userRouter)
-
+app.use('/api/posts',postRouter)
+app.use('/api/comments',commentRouter)
 
 
 app.listen(PORT)
