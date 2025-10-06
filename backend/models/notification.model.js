@@ -13,12 +13,15 @@ const notificationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ["follow", "like"],
+        enum: ["follow", "like","comment","reply"],
     },
     read:{
         type:Boolean,
        default:false,
-    }
+    }, message: {
+      type: String,
+      default: "",
+    },
 
 }, { timestamps: true })
 

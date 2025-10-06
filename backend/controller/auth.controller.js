@@ -59,12 +59,12 @@ export const login = async (req, res) => {
     const {username,password}=req.body
     const user=await User.findOne({username})
      if(!user){
-        return res.status(400).json('username does not exist')
+        return res.status(400).json({message:'username does not exist'})
      }
     
     const isMath=await bcrypt.compare(password,user?.password||"")
     if(!isMath){
-       return res.status(400).json('invaild password or username')
+       return res.status(400).json({message:'invaild password or username'})
     }
     generateTokenAndSetCookie(user._id,res)
     res.status(200).json({
@@ -91,7 +91,7 @@ export const logout = async (req, res) => {
     res.status(200).json({ message: 'logout successful' })
    } catch (error) {
     console.log('errror in logout controller',error)
-    res.status(500).json("internal server error")
+    res.status(500).json({message:"internal server error"})
    }
 }
 export const getMe=async(req,res)=>{
@@ -100,6 +100,6 @@ export const getMe=async(req,res)=>{
      res.status(200).json(user)
    } catch (error) {
     console.error('error in getme controller',error)
-    res.status(500).json('Internal server error')
+    res.status(500).json({message:"Internla server error"})
    }
 }

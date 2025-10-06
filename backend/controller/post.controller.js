@@ -5,36 +5,57 @@ import User from "../models/user.model.js"
 import { v2 as cloudinary } from "cloudinary"
 export const createPost = async (req, res) => {
     try {
-        const { title, text, } = req.body
-        let { img } = req.body
+
+        const { title, text } = req.body
+
+
+        const imageFileBuffer = req.file?.buffer;
+
         const userId = req.user._id
 
         if (!userId) {
+
             return res.status(404).json({ message: "User not found" })
         }
         if (!title || !text) {
+
             return res.status(400).json({ message: "Title and text are required" })
         }
-        if (img) {
-            try {
-                const uploadResponse = await cloudinary.uploader.upload(img, { folder: "posts" })
-                img = uploadResponse.secure_url
-            } catch (error) {
-                console.error('error in uploading cloundinary', error)
-                return res.status(500).json({ message: "Internal server error" })
-            }
 
+        let imgUrl = null;
+
+
+        if (imageFileBuffer) {
+            try {
+
+                const base64Image = `data:${req.file.mimetype};base64,${imageFileBuffer.toString('base64')}`;
+
+
+                const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+                    folder: "posts"
+                })
+                imgUrl = uploadResponse.secure_url
+
+            } catch (error) {
+                console.error('error in uploading to Cloudinary:', error)
+
+                return res.status(500).json({ message: "Failed to upload image" })
+            }
         }
+
+
         const newPost = new Post({
             title,
             text,
             user: userId,
-            img,
+            img: imgUrl,
         })
+
         await newPost.save()
-        res.status(200).json(newPost)
+        res.status(201).json(newPost)
+
     } catch (error) {
-        console.error("erorr in createPost controller", error)
+        console.error("erorr in createPost controller:", error)
         res.status(500).json({ message: "Internal server error" })
     }
 }
@@ -74,24 +95,26 @@ export const likeUnlikePost = async (req, res) => {
         if (!post) {
             return res.status(404).json({ message: "post not found" })
         }
-
+        const user = await User.findById(userId)
         const isLiked = post.likes.includes(userId)
         if (isLiked) {
             const updatePost = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true });
             await User.findByIdAndUpdate(userId, { $pull: { likedPosts: postId } }, { new: true })
-            res.status(200).json({ message: "post unliked successfully", likeCount: updatePost.likes.length })
+            res.status(200).json({ message: "post unlike successfully", likeCount: updatePost.likes.length })
         } else {
             const updatePost = await Post.findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true });
             await User.findByIdAndUpdate(userId, { $addToSet: { likedPosts: postId } }, { new: true });
 
+            if (userId.toString() !== post.user.toString()) {
+                const newNoti = new Notification({
+                    from: userId,
+                    to: post.user,
+                    type: "like",
+                    message: `${user.username} liked your post ${post.title}`
+                })
+                await newNoti.save()
+            }
 
-            const newNoti = new Notification({
-                from: userId,
-                to: post.user,
-                type: "like",
-
-            })
-            await newNoti.save()
 
 
             res.status(200).json({ message: "post liked successfully", likeCount: updatePost.likes.length })
@@ -126,25 +149,43 @@ export const getFollowedPost = async (req, res) => {
         if (!followeduser || followeduser.length === 0) {
             return res.status(200).json({ message: "No posts yet", posts: [] });
         }
-        const allpost = await Post.find({ user: { $in: followeduser } }).populate({ path: "user", select: "-password" }).sort({createdAt:-1})
-        res.status(200).json(allpost)
+        const allpost = await Post.find({ user: { $in: followeduser } }).populate({ path: "user", select: "-password" }).sort({ createdAt: -1 })
+
+        res.status(200).json({ posts: allpost });
     } catch (error) {
         console.log('erorr in gettingAllPost', error)
         res.status(500).json({ message: error.message })
     }
 }
 
-export const getUserOwnPost=async(req,res)=>{
+export const getUserOwnPost = async (req, res) => {
     try {
-        const username=req.params.username
-        const user=await User.findOne({username})
-        if(!user){
-            return res.status(404).json({message:"usernot found"})
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
-        const post=await Post.find({user:user._id}).populate({path:"user",select:"-password"}).sort({createdAt:-1})
-        res.status(200).json(post)
+
+
+        const ownPosts = await Post.find({ user: user._id })
+            .populate({ path: "user", select: "-password" })
+            .sort({ createdAt: -1 });
+
+
+        const likedPosts = await User.findById(user._id)
+            .populate({
+                path: "likedPosts",
+                populate: { path: "user", select: "-password" },
+                options: { sort: { createdAt: -1 } },
+            })
+            .select("likedPosts");
+
+        res.status(200).json({
+            ownPosts,
+            likedPosts: likedPosts.likedPosts,
+        });
     } catch (error) {
-        console.log("erorr in getuserownpost controller",error)
-        res.status(500).json({message:error.message})
+        console.log("Error in getUserOwnPost controller", error);
+        res.status(500).json({ message: error.message });
     }
-}
+};

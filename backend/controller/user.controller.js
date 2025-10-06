@@ -28,14 +28,21 @@ export const followUnfollowUser = async (req, res) => {
             return res.status(400).json({ message: 'You cannot follow yourself' })
         }
         if (!userToModify || !currentUser) {
-            return res.status(404).json('User not found')
+            return res.status(404).json({message:"user not found"})
         }
         const isFollowing = currentUser.following.includes(userToModify._id)
         if (isFollowing) {
             //if user is alredy follow another user in this case we have to change unfollow right?
             await User.findByIdAndUpdate(id, { $pull: { follower: req.user._id } })
             await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } })
-            res.status(200).json('unfollowed successfully')
+              const updatedUser = await User.findById(id).select('-password');
+            const updatedCurrentUser = await User.findById(req.user._id).select('-password'); 
+
+            res.status(200).json({ 
+                message: 'unfollowed successfully',
+                user: updatedUser,
+                authUser: updatedCurrentUser, 
+            })
 
         } else {
             // imagine user 1 is followed to user2 so in user1 following list user2 have to exsist in user2 follower list user1 should exssit that's what we trying to do
@@ -45,12 +52,21 @@ export const followUnfollowUser = async (req, res) => {
                 type: "follow",
                 from: req.user._id,
                 to: id,
-                read: false
+                read: false,
+                message: `${userToModify.username} is followed to you`
             })
 
             await notification.save()
-            //Todo: we need return user data it will hepl in our client to easy
-            res.status(200).json('followed successfully')
+            const updatedUser = await User.findById(id).select('-password');
+            const updatedCurrentUser = await User.findById(req.user._id).select('-password');
+
+            return res.status(200).json({
+                message: 'Followed successfully',
+                user: updatedUser,
+                authUser: updatedCurrentUser,
+            })
+
+
         }
 
     } catch (error) {
@@ -90,8 +106,13 @@ export const getSuggestedUser = async (req, res) => {
 
 
 export const updateUserProfile = async (req, res) => {
-    const { username, fullname, email, currentPassword, newPassword, bio, link,  } = req.body;
-    let {profileImg,coverImg}=req.body
+
+    const { username, fullname, email, oldPassword, newPassword, bio, link } = req.body;
+
+
+    const profileFile = req.files && req.files['profileImg'] ? req.files['profileImg'][0] : null;
+    const coverFile = req.files && req.files['coverImg'] ? req.files['coverImg'][0] : null;
+
     const userId = req.user._id;
 
     try {
@@ -101,73 +122,92 @@ export const updateUserProfile = async (req, res) => {
         }
 
 
-        if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
-            return res.status(400).json({ message: "You must provide both currentPassword and newPassword" });
+        if (username !== user.username) {
+            const existingUsername = await User.findOne({ username });
+            if (existingUsername) return res.status(400).json({ message: "Username already taken." });
+        }
+        if (email !== user.email) {
+            const existingEmail = await User.findOne({ email });
+            if (existingEmail) return res.status(400).json({ message: "Email already registered." });
         }
 
 
-        if (currentPassword && newPassword) {
-            if (newPassword.length < 6) {
-                return res.status(400).json({ message: "New password must be at least 6 characters long." });
+        if (newPassword && newPassword.length > 0) {
+            if (!oldPassword) {
+                return res.status(400).json({ message: "Current password is required to set a new password" });
             }
-            const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
             if (!isMatch) {
-                return res.status(400).json({ message: "Current password is incorrect" });
+
+                return res.status(400).json({ message: "Incorrect current password" });
             }
 
-            const hashedPassword = await bcrypt.hash(newPassword, 10);
-            user.password = hashedPassword;
+
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(newPassword, salt);
+
+
         }
+
+
+        user.username = username || user.username;
+        user.fullname = fullname || user.fullname;
+        user.email = email || user.email;
+        user.bio = bio || user.bio;
+        user.link = link || user.link;
+
+
         let profileImgUrl = user.profileImg;
         let coverImgUrl = user.coverImg;
+
         try {
-            if (profileImg) {
+            if (profileFile) {
+
                 if (user.profileImg) {
                     const oldPublicId = getPublicIdFromUrl(user.profileImg, "Profile");
-                    if (oldPublicId) {
-
-                        await cloudinary.uploader.destroy(oldPublicId);
-                    }
+                    if (oldPublicId) await cloudinary.uploader.destroy(oldPublicId);
                 }
-                const result = await cloudinary.uploader.upload(profileImg, { folder: "Profile" });
+
+
+                const result = await cloudinary.uploader.upload(
+                    `data:${profileFile.mimetype};base64,${profileFile.buffer.toString('base64')}`,
+                    { folder: "Profile" }
+                );
                 profileImgUrl = result.secure_url;
             }
 
-            if (coverImg) {
+            if (coverFile) {
+
                 if (user.coverImg) {
                     const oldPublicId = getPublicIdFromUrl(user.coverImg, "Cover");
-                    if (oldPublicId) {
-
-                        await cloudinary.uploader.destroy(oldPublicId);
-                    }
+                    if (oldPublicId) await cloudinary.uploader.destroy(oldPublicId);
                 }
-                const result = await cloudinary.uploader.upload(coverImg, { folder: "Cover" });
+
+
+                const result = await cloudinary.uploader.upload(
+                    `data:${coverFile.mimetype};base64,${coverFile.buffer.toString('base64')}`,
+                    { folder: "Cover" }
+                );
                 coverImgUrl = result.secure_url;
             }
         } catch (error) {
-
-            console.error('error in uploading image', error);
+            console.error('Error uploading image to Cloudinary:', error);
             return res.status(500).json({ message: "Image upload failed. Internal server error" });
         }
-        if (username) user.username = username;
-        if (fullname) user.fullname = fullname;
-        if (email && email !== user.email) {
-            const exsistEmail = await User.findOne({ email })
-            if (exsistEmail) {
-                return res.status(400).json({ message: "emial is already in use" })
-            }
-            user.email = email
 
-        } else if (email) {
-            user.email = email
-        }
-        if (bio) user.bio = bio;
-        if (link) user.link = link;
-        if (profileImg) user.profileImg = profileImgUrl;
-        if (coverImg) user.coverImg = coverImgUrl
+
+        if (profileFile) user.profileImg = profileImgUrl;
+        if (coverFile) user.coverImg = coverImgUrl;
+
+
         await user.save();
 
-        res.status(200).json({ message: 'Profile updated successfully' ,userdata:user});
+
+        user.password = undefined;
+
+        res.status(200).json(user);
+
     } catch (error) {
         console.error('Error in updateUserProfile:', error);
         res.status(500).json({ message: "Internal server error" });

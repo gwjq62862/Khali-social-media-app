@@ -47,7 +47,7 @@ const UserSchema = new mongoose.Schema({
         type:String,
         default:""
      },likedPosts:{
-        type:mongoose.Schema.ObjectId,
+        type:[mongoose.Schema.ObjectId],
         ref:"Post",
         default:[]
      }
