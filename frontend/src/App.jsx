@@ -8,7 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import UserProfile from "./pages/profile/Proifle";
 import NotificationsPage from "./pages/notification/Notification";
-import Sidebar from "./Components/Sidebar";
+import Sidebar from "./components/Sidebar";
 
 
 function App() {

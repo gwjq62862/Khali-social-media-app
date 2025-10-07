@@ -10,7 +10,8 @@ import {
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { followUnfollow } from "../../hooks/followUnfollow.hook";
-import Post from "../../Components/Post";
+import Post from "../../components/Post";
+
 
 const UserProfile = ({ authUser }) => {
   const navigate = useNavigate();

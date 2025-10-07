@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import SuggestedUsers from "../../Components/SuggestedUser";
-import Post from "../../Components/Post";
-import CreatePost from "../../Components/CreatePost";
+import SuggestedUsers from "../../components/SuggestedUser";
+import Post from "../../components/Post";
+import CreatePost from "../../components/CreatePost";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const Home = ({ user }) => {
