@@ -10,8 +10,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { followUnfollow } from "../../hooks/followUnfollow.hook";
-import Post from "../../components/Post";
-
+import Post from "../../Components/Post";
 
 const UserProfile = ({ authUser }) => {
   const navigate = useNavigate();
@@ -124,42 +123,50 @@ const UserProfile = ({ authUser }) => {
     onError: (error) => toast.error(error.message),
   });
 
-  const { mutate: updateProfileImg, isPending: isUpdatingProfileImg } = useMutation({
-    mutationFn: async (formDataToSend) => {
-      const res = await fetch("/api/users/update", {
-        method: "PUT",
-        body: formDataToSend,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update profile image");
-      return data;
-    },
-    onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["authUser"], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ["profile", profileUsername] }); 
-      toast.success("Profile image updated successfully!");
-    },
-    onError: (error) => toast.error(error.message),
-  });
+  const { mutate: updateProfileImg, isPending: isUpdatingProfileImg } =
+    useMutation({
+      mutationFn: async (formDataToSend) => {
+        const res = await fetch("/api/users/update", {
+          method: "PUT",
+          body: formDataToSend,
+        });
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "Failed to update profile image");
+        return data;
+      },
+      onSuccess: (updatedUser) => {
+        queryClient.setQueryData(["authUser"], updatedUser);
+        queryClient.invalidateQueries({
+          queryKey: ["profile", profileUsername],
+        });
+        toast.success("Profile image updated successfully!");
+      },
+      onError: (error) => toast.error(error.message),
+    });
 
-  const { mutate: updateCoverImg, isPending: isUpdatingCoverImg } = useMutation({
-    mutationFn: async (formDataToSend) => {
-      const res = await fetch("/api/users/update", {
-        method: "PUT",
-        body: formDataToSend,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update cover image");
-      return data;
-    },
-    onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["authUser"], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ["profile", profileUsername] });
-      toast.success("Cover image updated successfully!");
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
+  const { mutate: updateCoverImg, isPending: isUpdatingCoverImg } = useMutation(
+    {
+      mutationFn: async (formDataToSend) => {
+        const res = await fetch("/api/users/update", {
+          method: "PUT",
+          body: formDataToSend,
+        });
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "Failed to update cover image");
+        return data;
+      },
+      onSuccess: (updatedUser) => {
+        queryClient.setQueryData(["authUser"], updatedUser);
+        queryClient.invalidateQueries({
+          queryKey: ["profile", profileUsername],
+        });
+        toast.success("Cover image updated successfully!");
+      },
+      onError: (error) => toast.error(error.message),
+    }
+  );
 
   const { mutate: logout, isPending: isLoggingOut } = useMutation({
     mutationFn: async () => {
@@ -203,7 +210,6 @@ const UserProfile = ({ authUser }) => {
       formDataToSend.append("coverImg", file);
       updateCoverImg(formDataToSend);
     }
-
   };
 
   const handleUpdate = (e) => {
@@ -222,7 +228,6 @@ const UserProfile = ({ authUser }) => {
       formDataToSend.append("newPassword", formData.newPassword);
     }
 
-    
     updateProfile(formDataToSend);
   };
 
@@ -230,7 +235,7 @@ const UserProfile = ({ authUser }) => {
     logout();
     setIsLogoutModalOpen(false);
   };
-  
+
   const { follow, isPending: isFollowing } = followUnfollow();
   const isFollowed = authUser?.following?.includes(user?._id);
 
@@ -264,12 +269,16 @@ const UserProfile = ({ authUser }) => {
             className="w-full h-full object-cover"
           />
           {isOwnProfile && (
-            <label className={`absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-gray-800/60 text-white rounded-full cursor-pointer transition duration-150 ${isUpdatingCoverImg ? 'animate-pulse' : 'hover:bg-gray-700'}`}>
-                {isUpdatingCoverImg ? (
-                    <span className="loading loading-spinner text-white w-5 h-5" />
-                ) : (
-                    <FaCamera />
-                )}
+            <label
+              className={`absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 bg-gray-800/60 text-white rounded-full cursor-pointer transition duration-150 ${
+                isUpdatingCoverImg ? "animate-pulse" : "hover:bg-gray-700"
+              }`}
+            >
+              {isUpdatingCoverImg ? (
+                <span className="loading loading-spinner text-white w-5 h-5" />
+              ) : (
+                <FaCamera />
+              )}
               <input
                 type="file"
                 accept="image/*"
@@ -289,12 +298,16 @@ const UserProfile = ({ authUser }) => {
               className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-xl"
             />
             {isOwnProfile && (
-                <label className={`absolute bottom-0 right-0 z-20 flex items-center justify-center w-8 h-8 bg-gray-800/60 text-white rounded-full cursor-pointer transition duration-150 ${isUpdatingProfileImg ? 'animate-pulse' : 'hover:bg-gray-700'}`}>
-                    {isUpdatingProfileImg ? (
-                        <span className="loading loading-spinner text-white w-4 h-4" />
-                    ) : (
-                        <FaCamera className="text-sm" />
-                    )}
+              <label
+                className={`absolute bottom-0 right-0 z-20 flex items-center justify-center w-8 h-8 bg-gray-800/60 text-white rounded-full cursor-pointer transition duration-150 ${
+                  isUpdatingProfileImg ? "animate-pulse" : "hover:bg-gray-700"
+                }`}
+              >
+                {isUpdatingProfileImg ? (
+                  <span className="loading loading-spinner text-white w-4 h-4" />
+                ) : (
+                  <FaCamera className="text-sm" />
+                )}
                 <input
                   type="file"
                   accept="image/*"
@@ -334,7 +347,9 @@ const UserProfile = ({ authUser }) => {
               <button
                 className="btn btn-primary btn-md text-white"
                 onClick={() => setIsEditModalOpen(true)}
-                disabled={isUpdating || isUpdatingCoverImg || isUpdatingProfileImg}
+                disabled={
+                  isUpdating || isUpdatingCoverImg || isUpdatingProfileImg
+                }
               >
                 <FaEdit />
                 {isUpdating ? "Saving..." : "Edit Profile"}
@@ -359,7 +374,7 @@ const UserProfile = ({ authUser }) => {
                 }`}
                 disabled={isFollowing}
               >
-                  {" "}
+                {" "}
                 {isFollowing
                   ? "Processing..."
                   : isFollowed
@@ -374,9 +389,7 @@ const UserProfile = ({ authUser }) => {
       <div className="p-6 md:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 p-6 bg-base-200 rounded-xl shadow-md">
-            <h3 className="text-xl font-bold mb-3 text-gray-400 pb-1">
-              bio
-            </h3>
+            <h3 className="text-xl font-bold mb-3 text-gray-400 pb-1">bio</h3>
             <p className="text-white whitespace-pre-wrap leading-relaxed">
               {user?.bio || "No biography provided."}
             </p>

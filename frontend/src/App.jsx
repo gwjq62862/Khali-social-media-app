@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/home/Home";
 import Signup from "./pages/auth/sign-up/Singup";
@@ -8,8 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import UserProfile from "./pages/profile/Proifle";
 import NotificationsPage from "./pages/notification/Notification";
-import Sidebar from "./components/SIdebar";
-
+import Sidebar from "./Components/SIdebar";
 
 
 function App() {

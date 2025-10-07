@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import SuggestedUsers from "../../components/SuggestedUser";
-import Post from "../../components/Post";
-import CreatePost from "../../components/CreatePost";
+import SuggestedUsers from "../../Components/SuggestedUser";
+import Post from "../../Components/Post";
+import CreatePost from "../../Components/CreatePost";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const Home = ({ user }) => {
@@ -30,7 +30,7 @@ const Home = ({ user }) => {
       }
     },
   });
-  console.log(post)
+  console.log(post);
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   const forYouRef = useRef(null);
@@ -54,7 +54,6 @@ const Home = ({ user }) => {
     return () => window.removeEventListener("resize", updateUnderline);
   }, [tab]);
 
-
   const currentPosts =
     tab === "following"
       ? Array.isArray(post?.posts)
@@ -66,7 +65,6 @@ const Home = ({ user }) => {
 
   return (
     <div className="flex min-h-screen bg-base-100 ">
-
       <div className="flex-1 p-4 w-full max-w-4xl mx-auto">
         <div className="relative mb-3 ">
           <div className="flex space-x-8">
@@ -119,7 +117,6 @@ const Home = ({ user }) => {
           </div>
         </div>
 
-    
         <div
           className={`transition-all duration-300 ease-in-out transform overflow-hidden mb-4 ${
             showCreatePost
@@ -132,10 +129,9 @@ const Home = ({ user }) => {
           )}
         </div>
 
-    
         <AnimatePresence mode="wait">
           <motion.div
-            key={tab} 
+            key={tab}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -155,7 +151,6 @@ const Home = ({ user }) => {
           </motion.div>
         </AnimatePresence>
       </div>
-
 
       <div className="hidden lg:block w-72 p-4">
         <SuggestedUsers />
