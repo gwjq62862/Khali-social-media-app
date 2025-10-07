@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 const Signup = () => {
-  const queryClient=useQueryClient()
+  const queryClient = useQueryClient();
   const [data, setData] = useState({
     username: "",
     fullname: "",
@@ -55,14 +55,12 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-base-200">
       <div className="hero w-full max-w-4xl p-6">
         <div className="hero-content flex-col lg:flex-row-reverse gap-12">
-          {/* Signup Card */}
           <div className="card bg-base-100 w-full max-w-md shadow-xl rounded-2xl">
             <form className="card-body" onSubmit={handleSubmit}>
               <h2 className="text-4xl font-bold text-center mb-6 text-green-800">
                 Sign Up
               </h2>
 
-              {/* Username */}
               <div className="form-control">
                 <input
                   type="text"
@@ -75,7 +73,6 @@ const Signup = () => {
                 />
               </div>
 
-              {/* Full Name */}
               <div className="form-control mt-4">
                 <input
                   type="text"
@@ -88,7 +85,6 @@ const Signup = () => {
                 />
               </div>
 
-              {/* Email */}
               <div className="form-control mt-4">
                 <input
                   type="email"
@@ -101,7 +97,6 @@ const Signup = () => {
                 />
               </div>
 
-              {/* Password */}
               <div className="form-control mt-4">
                 <input
                   type="password"
@@ -135,7 +130,6 @@ const Signup = () => {
             </form>
           </div>
 
-          {/* Info Section */}
           <div className="text-center lg:text-left max-w-lg">
             <h1 className="text-5xl font-extrabold mb-4 text-green-900">
               Welcome to Khali Social!

@@ -119,7 +119,7 @@ const Home = ({ user }) => {
           </div>
         </div>
 
-        {/* CreatePost Form */}
+    
         <div
           className={`transition-all duration-300 ease-in-out transform overflow-hidden mb-4 ${
             showCreatePost

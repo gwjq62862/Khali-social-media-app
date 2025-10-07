@@ -1,4 +1,4 @@
-// App.jsx
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/home/Home";
 import Signup from "./pages/auth/sign-up/Singup";

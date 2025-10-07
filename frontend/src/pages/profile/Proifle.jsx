@@ -220,9 +220,7 @@ const UserProfile = ({ authUser }) => {
       formDataToSend.append("oldPassword", formData.oldPassword);
       formDataToSend.append("newPassword", formData.newPassword);
     }
-    
-    // Note: We are no longer sending profile/cover images from this form, 
-    // as they are handled instantly in handleImageChange.
+
     
     updateProfile(formDataToSend);
   };
