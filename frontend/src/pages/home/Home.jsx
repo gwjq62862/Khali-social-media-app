@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "../../Components/Sidebar";
+
 import SuggestedUsers from "../../Components/SuggestedUser";
 import Post from "../../Components/Post";
 import CreatePost from "../../Components/CreatePost";

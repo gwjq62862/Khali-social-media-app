@@ -4,10 +4,12 @@ import Home from "./pages/home/Home";
 import Signup from "./pages/auth/sign-up/Singup";
 import Login from "./pages/auth/login/Login";
 import toast, { Toaster } from "react-hot-toast";
-import Sidebar from "./Components/Sidebar";
+
 import { useQuery } from "@tanstack/react-query";
 import UserProfile from "./pages/profile/Proifle";
 import NotificationsPage from "./pages/notification/Notification";
+import Sidebar from "./Components/Sidebar";
+
 
 function App() {
   const {
